@@ -79,3 +79,9 @@ The java plugin uses a convention for directory structure
 Running `gradle tasks` displays a list of all the tasks that the java plugin has installed.
 
 Run `gradle build` to build the project.
+
+Gradle output will mark a task `UP-TO-DATE` if there's nothing to do. Re-running a build will only rebuild things that have changed.
+
+Gradle output goes to the `build` folder, example compiled classes, libs, jar files, etc.
+
+Simple example can be run `java -cp build/classes/main com.pluralsight.Hello`
