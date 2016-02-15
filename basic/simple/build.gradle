@@ -25,3 +25,19 @@ task Task6 {
 Task6.doFirst {
   println "Task 6 another doFirst closure was appended"
 }
+
+Task6.dependsOn Task5
+Task6.dependsOn Task3
+
+Task5.dependsOn Task4
+
+task Task7 {
+  description "This is task 7"
+  dependsOn Task6
+  doFirst {
+    println "Task 7 doFirst"
+  }
+  doLast {
+    println "Task 7 doLast"
+  }
+}

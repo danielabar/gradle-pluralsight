@@ -15,6 +15,8 @@
     - [What is a Task](#what-is-a-task)
     - [Writing Simple Tasks](#writing-simple-tasks)
     - [Running Tasks](#running-tasks)
+    - [Task Phases](#task-phases)
+    - [Task Dependencies](#task-dependencies)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -297,3 +299,49 @@ Task 6 is running
 
 BUILD SUCCESSFUL
 ```
+
+### Task Dependencies
+
+Each task has a `dependsOn` method that can be passed the tasks that this task depends on:
+
+```groovy
+Task6.dependsOn Task5
+```
+
+Now running Task6 will FIRST run Task5, then Task6. Notice that Task6's `doFirst` methods run _after_ Task5's `doLast` methods:
+
+```
+Task5
+This is Task 5
+Another closure
+:Task6
+Task 6 another doFirst closure was appended
+Task 6 first
+Task 6 is running
+```
+
+Continuing on, if Task5 depends on Task4, then running Task6 will first run 4, 5, then 6.
+
+A task can also have _multiple_ dependencies:
+
+```groovy
+Task6.dependsOn Task5
+Task6.dependsOn Task3
+```
+
+Can also specify dependencies inside the task closure:
+
+```groovy
+task Task7 {
+  description "This is task 7"
+  dependsOn Task6
+  doFirst {
+    println "Task 7 doFirst"
+  }
+  doLast {
+    println "Task 7 doLast"
+  }
+}
+```
+
+Dependencies are built during the configuration phase. When a task is executed, the dependency graph has already been determined, and Gradle can simply walk through the graph, executing tasks.
