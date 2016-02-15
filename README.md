@@ -248,3 +248,52 @@ task Task6 {
   }
 }
 ```
+
+### Task Phases
+
+* Initialization phase: Used to configure multi project builds
+* Configuration phase: Executes code in the task that's not in the action, for example, setting the "description" property
+* Execution phase: Execute the task actions such as `doFirst`, `doLast`
+
+Every task has a `doFirst` method, for example:
+
+```groovy
+task Task6 {
+  description "Task 6 is the best task ever"
+  doFirst {
+    "Task 6 first"
+  }
+  doLast {
+    println "Task 6 is running"
+  }
+}
+```
+
+A task can have multiple `doFirst`'s and multiple `doLast`'s. When left shift `<<` operator is used to append a task, it gets added to the `doLast`. To add multiple `doFirst`'s, simply call it multiple times:
+
+```groovy
+task Task6 {
+  description "Task 6 is the best task ever"
+  doFirst {
+    println "Task 6 first"
+  }
+  doLast {
+    println "Task 6 is running"
+  }
+}
+
+Task6.doFirst {
+  println "Task 6 another doFirst closure was appended"
+}
+```
+
+Output from running `gradle Task6`:
+
+```
+:Task6
+Task 6 another doFirst closure was appended
+Task 6 first
+Task 6 is running
+
+BUILD SUCCESSFUL
+```

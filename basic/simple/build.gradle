@@ -14,7 +14,14 @@ Task5 << { println "Another closure" }
 
 task Task6 {
   description "Task 6 is the best task ever"
+  doFirst {
+    println "Task 6 first"
+  }
   doLast {
     println "Task 6 is running"
   }
+}
+
+Task6.doFirst {
+  println "Task 6 another doFirst closure was appended"
 }
