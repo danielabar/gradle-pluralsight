@@ -34,8 +34,8 @@
 ### Install
 
 ```shell
-brew cask install java
-brew install gradle
+$ brew cask install java
+$ brew install gradle
 ```
 
 ### Gradle Builds
@@ -60,7 +60,7 @@ task hello {
 To run this, `cd` to directly where `build.gradle` is located and run
 
 ```shell
-gradle hello
+$ gradle hello
 ```
 
 #### Task Lifecycle
@@ -115,7 +115,7 @@ task wrapper(type: Wrapper) {
 Execute the wrapper task:
 
 ```shell
-gradle wrapper
+$ gradle wrapper
 ```
 
 This task sets up the gradle wrapper. Generates two new files in project root, `gradlew` (shell script) and `gradlew.bat` (for windows).
@@ -131,3 +131,77 @@ Now instead of running tasks via `gradle`, instead use the wrapper, `gradlew`. F
 This will first download the version of gradle specified in the wrapper, install it in your home `.gradle` directory, then run the task using that gradle version.
 
 The gradle wrapper scripts and jar files can be checked into version control, along with the gradle wrapper task specified in the build file. This ensures that everyone who checks out the project and runs the build will do so with the same gradle version.
+
+## Basic Gradle Tasks
+
+Gradle DSL is written in Groovy, which is a JVM language. See [Groovy Fundamentals Course on Pluralsight](https://app.pluralsight.com/library/courses/groovy-fundamentals/table-of-contents).
+
+### What is a Task
+
+* Code that Gradle will execute
+* Has a __lifecycle__ (different parts of the task will run at different times)
+  * Initialization phase
+  * Configuration phase
+  * Execution phase
+* Has __properties__
+  * Common properties such as description, and group it belongs to
+  * Custom to that task such as directory files are being copied to or from
+  * Properties are typically configured during the Configuration Phase of the lifecycle
+* Has __actions__ (code that executes), divided into two parts:
+  * First action - code that needs to run before other code within the task
+  * Last action - code that executes as part of the task
+* Has __dependencies__: A task may require that another task complete before this one can execute. Gradle will work out the task dependencies and take care that tasks run in the correct order.
+
+### Writing Simple Tasks
+
+Groovy is object oriented. In a Gradle build script, top level object is `project`.
+This object is used to define everything within build script.
+
+To create a task:
+
+```groovy
+project.task("Task1")
+```
+
+To list all tasks
+
+```shell
+$ gradle tasks
+```
+
+Notice "Task1" is in a group called "Other tasks".
+
+Can also define a task without `project` keyword, because Gradle knows "project" is the top level object and will delegate everything to it:
+
+```groovy
+task("Task2")
+```
+
+Another way to define a task, don't need brackets:
+
+```groovy
+task "Task3"
+```
+
+Finally, don't even need the quotes to define a task:
+
+```groovy
+task Task4
+```
+
+To add a property to a task:
+
+```groovy
+Task4.description = "My super duper awesome task"
+```
+
+Description will appear in shell when running `gradle tasks`, for example:
+
+```
+Other tasks
+-----------
+Task1
+Task2
+Task3
+Task4 - My super duper awesome task
+```

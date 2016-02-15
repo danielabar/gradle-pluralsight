@@ -1,0 +1,8 @@
+project.task("Task1");
+
+task("Task2")
+
+task "Task3"
+
+task Task4
+Task4.description = "My super duper awesome task"
