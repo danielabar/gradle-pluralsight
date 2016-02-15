@@ -1,3 +1,8 @@
+project.ext.biggerScopeVariable = "2.1"
+ext.shortHandVariable = "shortHand"
+
+def projectVersion = "2.1.1"
+
 project.task("Task1");
 
 task("Task2")
@@ -15,15 +20,15 @@ Task5 << { println "Another closure" }
 task Task6 {
   description "Task 6 is the best task ever"
   doFirst {
-    println "Task 6 first"
+    println "Task 6 first - some big project var $project.ext.biggerScopeVariable"
   }
   doLast {
-    println "Task 6 is running"
+    println "Task 6 is running - version $projectVersion"
   }
 }
 
 Task6.doFirst {
-  println "Task 6 another doFirst closure was appended"
+  println "Task 6 another doFirst closure was appended - $shortHandVariable"
 }
 
 Task6.dependsOn Task5

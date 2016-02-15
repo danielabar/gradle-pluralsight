@@ -17,6 +17,7 @@
     - [Running Tasks](#running-tasks)
     - [Task Phases](#task-phases)
     - [Task Dependencies](#task-dependencies)
+    - [Setting Properties on Tasks](#setting-properties-on-tasks)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -345,3 +346,42 @@ task Task7 {
 ```
 
 Dependencies are built during the configuration phase. When a task is executed, the dependency graph has already been determined, and Gradle can simply walk through the graph, executing tasks.
+
+### Setting Properties on Tasks
+
+Properties can be defined using local variables with `def` keyword.
+Then the variable can be used in tasks using string interpolation.
+
+Local variable has scope of the given build file in which its declared. This might not be suitable for a multi-project build if need the variable available in other build files.
+
+Variables can also be defined inside a task, in a closure.
+
+```groovy
+def projectVersion = "2.1.0"
+
+Task6 {
+  doLast {
+    println "This is task 6 - version $projectVersion"
+  }
+}
+```
+
+To have a variable available in a larger scope, across projects, use _extra properties_.
+
+```groovy
+project.ext.projectVersion = "2.1.0"
+...
+doFirst {
+  println "Task 6 first - some big project var $project.ext.biggerScopeVariable"
+}
+```
+
+Because its set on project, don't need to state it explicitly, so can just say:
+
+```groovy
+ext.projectVersion = "2.1.0"
+...
+doFirst {
+  println "Task 6 first - some big project var $biggerScopeVariable"
+}
+```
