@@ -11,6 +11,10 @@
       - [Task Lifecycle](#task-lifecycle)
       - [Build Java](#build-java)
     - [Gradle Wrapper](#gradle-wrapper)
+  - [Basic Gradle Tasks](#basic-gradle-tasks)
+    - [What is a Task](#what-is-a-task)
+    - [Writing Simple Tasks](#writing-simple-tasks)
+    - [Running Tasks](#running-tasks)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -195,13 +199,52 @@ To add a property to a task:
 Task4.description = "My super duper awesome task"
 ```
 
-Description will appear in shell when running `gradle tasks`, for example:
+Description will appear in shell when running `gradle tasks`.
 
+### Running Tasks
+
+First need to write a task action. All tasks have a `doLast` method, which is the last thing the task does. It gets passed a _Groovy closure_, which is code that lives between braces.
+
+```groovy
+task Task4
+Task4.description = "My super duper awesome task"
+Task4.doLast { println "This is Task 4" }
 ```
-Other tasks
------------
-Task1
-Task2
-Task3
-Task4 - My super duper awesome task
+
+To run the task:
+
+```shell
+$ gradle Task4
+```
+
+Another way to write a task action is to use left shift operator `<<` instead of explicit `doLast`.
+`<<` is overridden by Groovy to add a closure to `doLast`.
+
+```groovy
+task Task3
+Task3 << println "This is Task 3"
+```
+
+Can declare a task and add action in one line:
+
+```groovy
+task Task5 << { println "This is Task 5" }
+```
+
+Note you can keep adding clojures, and Gradle will append them:
+
+```groovy
+task Task5 << { println "This is Task 5" }
+Task5 << { println "Another closure" }
+```
+
+Can add properties and actions all at once:
+
+```groovy
+task Task6 {
+  description "Task 6 is the best task ever"
+  doLast {
+    println "Task 6 is running"
+  }
+}
 ```
