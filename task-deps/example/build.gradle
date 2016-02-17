@@ -1,0 +1,16 @@
+// Define tasks
+task taskA << { println "=== task A"}
+task taskB << { println "=== task B"}
+task taskC << { println "=== task C"}
+task taskD << { println "=== task D"}
+task taskE << { println "=== task E"}
+task taskF << { println "=== task F"}
+
+// Task dependencies
+taskA.dependsOn taskB
+taskA.dependsOn taskD, taskC
+
+taskC.dependsOn taskE
+taskD.dependsOn taskE
+
+taskA.dependsOn taskE

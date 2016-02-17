@@ -18,6 +18,7 @@
     - [Task Phases](#task-phases)
     - [Task Dependencies](#task-dependencies)
     - [Setting Properties on Tasks](#setting-properties-on-tasks)
+  - [Task Dependencies](#task-dependencies-1)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -330,6 +331,12 @@ Task6.dependsOn Task5
 Task6.dependsOn Task3
 ```
 
+Can also specify multiple dependencies as comma separated list:
+
+```groovy
+Task6.dependsOn Task5, Task3
+```
+
 Can also specify dependencies inside the task closure:
 
 ```groovy
@@ -385,3 +392,20 @@ doFirst {
   println "Task 6 first - some big project var $biggerScopeVariable"
 }
 ```
+
+## Task Dependencies
+
+Note: To suppress gradle's output when running tasks, to only see task output, use `-q` flag for quiet logging:
+
+```shell
+$ gradle -q taskA
+```
+
+When a task has multiple dependencies, the order is undefined, gradle will pick some order:
+
+```groovy
+taskA.dependsOn taskB
+taskA.dependsOn taskC, taskD
+```
+
+Can't predict in what order B, C, D will run in.
