@@ -409,3 +409,44 @@ taskA.dependsOn taskC, taskD
 ```
 
 Can't predict in what order B, C, D will run in.
+
+### Other Dependencies
+
+* mustRunAfter
+  * If two tasks execute, one _must_ run after the other
+  * Circular dependencies will fail the build
+* shouldRunAfter
+  * If two tasks execute, one _should_ run after the other
+  * Ignores circular dependencies
+* finalizedBy
+  * Inverted dependency
+
+Examples:
+
+```groovy
+taskB.mustRunAfter taskC, taskD
+taskB.shouldRunAfter taskD
+```
+
+`mustRunAfter` and `shouldRunAfter` only kick in when both tasks are run. For example:
+
+```groovy
+task task1 << { println "task 1" }
+task task2 << { println "task 2" }
+
+task2.mustRunAfter task1
+```
+
+Then running task1 by itself will NOT cause task 2 to run:
+
+```shell
+$ gradle -q task1
+```
+
+However, running both at command line will enforce that task1 always runs first, then task 2.
+The following two commands will produce the same output:
+
+```shell
+$ gradle -q task1 task2
+$ gradle -q task2 task1
+```

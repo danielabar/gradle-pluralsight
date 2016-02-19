@@ -14,3 +14,21 @@ taskC.dependsOn taskE
 taskD.dependsOn taskE
 
 taskA.dependsOn taskE
+
+task taskG {
+  dependsOn taskE
+  doLast {
+    println "=== task G"
+  }
+}
+
+taskA.dependsOn taskG
+
+taskB.mustRunAfter taskC
+// circular dependency (in a real project, wouldn't be this obvious)
+// taskB.mustRunAfter taskC, taskB
+
+taskB.shouldRunAfter taskD
+
+// whenever taskE is run, must run taskF after
+taskE.finalizedBy taskF
