@@ -22,6 +22,11 @@
     - [Other Dependencies](#other-dependencies)
   - [Typed Tasks](#typed-tasks)
     - [The Copy Task](#the-copy-task)
+  - [Building a Java Project](#building-a-java-project)
+    - [Introduction to the Java Plugin](#introduction-to-the-java-plugin)
+    - [Writing Your First Java Build](#writing-your-first-java-build)
+    - [Performance and the Gradle Daemon](#performance-and-the-gradle-daemon)
+    - [Multi-project Builds](#multi-project-builds)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -520,6 +525,146 @@ task copyConfig (type: Copy) {
 }
 ```
 
-`expand` property takes a directionary with names of text to replace and what it should be replaced with.
+`expand` property takes a dictionary with names of text to replace and what it should be replaced with.
 
-Placeholders start with `$` in file, for example web.xml might have `<res-ref-name>$resourceRefName</res-ref-name>`.
+Placeholders start with `$` in file, for example web.xml might have `<res-ref-name>$resourceRefName</res-ref-name>`.   
+
+## Building a Java Project
+
+### Introduction to the Java Plugin
+
+[Docs](https://docs.gradle.org/current/userguide/java_plugin.html)
+
+To start, simply add the java gradle plugin to the build file:
+
+```groovy
+apply plugin: 'java'
+```
+
+The java plugin adds many tasks to the project including:
+
+* build
+* clean
+* javadoc
+* test
+
+Expects standard (maven) project layout:
+
+* src/main/java
+* src/main/resources
+* src/test/java
+* src/test/resources
+
+If you use a different convention for project layout, can be customized using gradle _SourceSets_, to define where sources are located. For example,
+
+```groovy
+sourceSets {
+  main {
+    java {
+      srcDir 'src/java'
+    }
+    resources {
+      srcDir 'src/resources'
+    }
+  }
+}
+```
+
+### Writing Your First Java Build
+
+[Example](java/build.gradle)
+
+To build a versioned jar, specify version number in build.gradle, for example:
+
+```groovy
+version = '1.0.0.SNAPSHOT'
+```
+
+Then running `gradle build` will generate a versioned jar in `build/libs`.
+
+The `build`  task is dependent upon a number of other tasks, as can be seen from the output:
+
+```
+:compileJava
+:processResources
+:classes
+:jar
+:assemble
+:compileTestJava
+:processTestResources
+:testClasses
+:test
+:check
+:build
+```
+
+`compileJava` generates the classes files in `build/lib/classes`.
+
+`classes` task seems to do the same thing as `compileJava`, BUT, it depends on `processResources`.
+
+`processResources` is a copy task, which copies resources from `src/main/resources` into `build/classes`.
+
+Therefore `classes` ties together the compilation `compileJava` and the copying of resources `processResources`.
+
+`jar` is a low level task that creates the jar file in `build/lib`.
+
+`assemble` is the java plugin task that creates all the jar files within the project. This is a _lifecycle_ task in the gradle plugin.
+
+### Performance and the Gradle Daemon
+
+Each time the build is run, gradle has to re-launch the jvm. It would be better if gradle could re-use an existing vm. Gradle can do this using the _daemon_.
+
+To use the daemon via cli:
+
+```shell
+$ gradle --daemon clean build
+```
+
+The first build run with daemon may still be slow, but subsequent builds will be faster.
+
+Alternatively, daemon can be specified via the GRADLE_OPTS environment variable.
+
+But the best way is to create a `gradle.properties` file in home directory and turn on the daemon:
+
+```
+org.gradle.daemon=true
+```
+
+### Multi-project Builds
+
+Gradle also supports multi-project builds to link them together. For example when a class in one project depends on a class from another project. This is done in a top level gradle build file to specify the projects that make up the multi-project build.
+
+* Add top level settings.gradle, which lists all the projects
+* Add top level build.gradle to configure all the projects
+    * defines project wide build functionality
+    * specify dependencies between projects
+
+`settings.gradle` includes all the projects, for example:
+
+```groovy
+include 'Repository', 'Jacket'
+```
+
+`build.gradle` specifies any commonalities across projects (eg: applying java plugin to all projects). Also specify dependencies between projects.
+
+To apply java plugin to all projects, wrap the apply plugin call in the `allprojects` method closure:
+
+```groovy
+allprojects {
+  apply plugin: 'java'
+}
+```
+
+Specify which projects are part of the multi-build, `:` specifies relative to current location. Furthermore, specify project configuration if needed, for example, `Jacket` project depends on `Repository`:
+
+```groovy
+project(':Repository'){}
+
+project(':Jacket'){
+  dependencies {
+    compile project(':Repository')
+  }
+}
+```
+
+Now can go to the Jacket project (which depends on Repository), run `gradle build`, and it will step up to Repository project for the dependency and build will succeed.
