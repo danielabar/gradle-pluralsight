@@ -27,6 +27,10 @@
     - [Writing Your First Java Build](#writing-your-first-java-build)
     - [Performance and the Gradle Daemon](#performance-and-the-gradle-daemon)
     - [Multi-project Builds](#multi-project-builds)
+  - [Dependencies](#dependencies)
+    - [Introduction to Repositories](#introduction-to-repositories)
+    - [Repository Dependencies](#repository-dependencies)
+    - [Gradle Cache](#gradle-cache)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -668,3 +672,137 @@ project(':Jacket'){
 ```
 
 Now can go to the Jacket project (which depends on Repository), run `gradle build`, and it will step up to Repository project for the dependency and build will succeed.
+
+## Dependencies
+
+Typical project will have dependencies on:
+
+* Other projects
+* External libraries (eg: on the web somewhere)
+* Internal libraries (eg: on company internal nexus repo)
+
+Dependencies can be satisfied from:
+
+* Other projects
+* File system
+* Maven repositories
+* Ivy repositories (gradle support deprecated?)
+
+__Can Have Many Configurations__
+
+Depenedency will often only be needed for a specific action, eg: junit only needed when running tests, but not for compiling application. Can define custom configurations, and also plugins bring in their own configurations.
+
+For example, Java plugin has these configurations:
+
+* compile
+* runtime
+* testCompile
+* testRuntime
+
+Dependencies don't have to be isolated, for example `runtime` dependency extends the `compile` time dependency. Furthermore, dependencies can be included or excluded from each configuration.
+
+__Transitive Dependencies__
+
+Some dependencies will depend on other libraries, these are called _transitive dependencies_.
+
+To list dependencies for a given project (`-q` is quite):
+
+```shell
+$ gradle -q dependencies
+```
+
+To list dependencies for a given configuration within a project
+
+```shell
+$ gradle -q dependencies --configuration compile
+```
+
+### Introduction to Repositories
+
+Maven Remote:
+
+```groovy
+repositories {
+  mavenCentral()
+}
+repositories {
+  jcenter() // https
+}
+```
+
+Or to use jcenter over http:
+
+```groovy
+repositories {
+  url "http://jcenter.bintray.com/"
+}
+```
+
+To use your local maven installation (i.e. `~/.m2`)
+
+```groovy
+repositories {
+  mavenLocal()
+}
+```
+
+To use an internal company repo such as nexus:
+
+```groovy
+repositories {
+  maven {
+    url "http://repo.mycompany.com/maven2"
+  }
+}
+```
+
+Repositories can be configured, for example, if need to specify a username and password to access company repo.
+
+Can also specify multiple repositories. Dependencies will be resolved in _order_ which repos are listed:
+
+```groovy
+repositories {
+  maven {
+    url "http://repo.mycompany.com/maven2"
+  }
+  ivy {
+    url "http://repo.mycompany,com/repo"
+  }
+}
+```
+
+### Repository Dependencies
+
+When using a repository, dependencies must specify group, name, and version. For example:
+
+```groovy
+dependencies {
+  compile group: 'log4j', name: 'log4j', version: '1.2.17'
+}
+```
+
+Or can use shorthand syntax:
+
+```groovy
+dependencies {
+  compile 'log4j:log4j:1.2.17'
+}
+```
+
+Then when running a build, Gradle will download the jars and pom files (metadata). Next time running the build, will not need to download jar/pom again because it gets cached.
+
+### Gradle Cache
+
+Dependencies are cached when they get downloaded.
+
+* File based
+* Metadata and files stored separately
+* Repository caches are independent
+
+Names of the files in the cache are SHA1 based. To determine if file needs to be downloaded again, look at repository, create SHA1 of file, check the name in the file system, if SHA1's are different, needs to be re-downloaded.
+
+Dependencies can be refreshed by passing `--refresh-dependencies` flag to build (will run SHA1 check described above).
+
+For force refresh, can safely delete cached files, and on next build, everything will be downloaded again.
+
+Gradle cache is at `~/.gradle/caches/modules-2`
