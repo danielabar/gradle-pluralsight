@@ -806,3 +806,67 @@ Dependencies can be refreshed by passing `--refresh-dependencies` flag to build 
 For force refresh, can safely delete cached files, and on next build, everything will be downloaded again.
 
 Gradle cache is at `~/.gradle/caches/modules-2`
+
+## Testing
+
+Testing is integral to the Java plugin. It defines:
+
+* source set where the test sources are located
+* task to compile the Tests
+* task to run the tests
+
+By convention, the source set will look for tests in `src/test/java`, but that can be customized.
+
+Test compilation output goes to `build/classes/test`.
+
+When tests are run, reports go to `build/reports/test`.
+
+### Running Tests
+
+```shell
+$ gradle test
+```
+
+Tests are also run as part of `gradle build`.
+
+A failing test fails the build.
+
+### Using Filters to Select Tests
+
+By default, `gradle test` runs _all_ the tests.
+
+A _filter_ can be used to run only a subset of tests, or a single test, or all tests from a package. Wildcards are supported (otherwise need to specify fully qualified name of the test).
+
+Pass a closure to the test command which is a filter, then pass a closure to the filter to specify tests that should be added:
+
+```groovy
+test {
+  filter {
+    includeTestsMatching 'com.foo.shouldCreateASession'
+    includeTestsMatching '*shouldCreateASession'
+  }
+}
+```
+
+Can also define a custom task for testing with filter:
+
+```groovy
+task singleTest (type: test) {
+  dependsOn testClasses
+  filter {
+    includeTestsMatching '*shouldCreateASession'
+  }
+}
+```
+
+Filter can also be specified at cli, to override any existing filter configuration:
+
+```shell
+$ gradle test --tests *shouldCreateASession
+```
+
+### Adding Other Test Types
+
+All of the above notes on testing is for unit testing only. But what about other types of tests such as integration?
+
+Use [gradle-testsets-plugin](https://github.com/unbroken-dome/gradle-testsets-plugin).
