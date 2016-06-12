@@ -19,6 +19,9 @@
     - [Task Dependencies](#task-dependencies)
     - [Setting Properties on Tasks](#setting-properties-on-tasks)
   - [Task Dependencies](#task-dependencies-1)
+    - [Other Dependencies](#other-dependencies)
+  - [Typed Tasks](#typed-tasks)
+    - [The Copy Task](#the-copy-task)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -450,3 +453,73 @@ The following two commands will produce the same output:
 $ gradle -q task1 task2
 $ gradle -q task2 task1
 ```
+
+## Typed Tasks
+
+[Example](typed/build.gradle)
+
+All the tasks created up to now have been _Ad-hock tasks_ such as:
+
+* `task Task1`
+* `task Task2 << {}`
+* `task Task3 {}`
+
+It would be more useful to be able to define a task once, and then re-use it later, passing in some configuration to control its behaviour. This is where _Typed Tasks_ come in.
+
+For example, to copy files, need more complex code (open file, read file, write file), zipping files.
+
+Gradle comes with some built in typed tasks, [docs](https://docs.gradle.org/current/dsl/) (scroll down to "Task types" in side nav).
+
+For example, to use copy type:
+
+```groovy
+task copyImages (type: Copy){
+  from 'src'
+  into 'dest'
+}
+```
+
+By specifying `type: Copy`, gradle treats this `copyImages` task as if it was the copy task. The task implementation is then just configuration.
+
+Copy task can get quite complex. Some of the config can be extracted using "copy specification".
+
+```groovy
+def contentSpec = copySpec {
+  exclude 'file1.txt'
+  from 'src'
+}
+
+/* Does the same thing as copyImages */
+task copyImages2 (type: Copy) {
+  with contentSpec
+  into 'dest'
+}
+```
+
+If there are a large number of files to exclude, rather than specifying them one at a time, can execute groovy code in the copy spec. Specify a closure for exclude, which gets an iterator `it`:
+
+```groovy
+def contentSpec = copySpec {
+  exclude {it.file.name.startsWith('file1')}
+  from 'src'
+}
+```
+
+### The Copy Task
+
+Can also rename files, restructure directories, expand files (text replacement). For example, to replace `resourceRefName` with `jdbc/JacketDB` as file web.xml is being copied from `src` directory into `config` directory:
+
+```groovy
+task copyConfig (type: Copy) {
+  include 'web.xml'
+  from 'src'
+  into 'config'
+  expand ([
+    resourceRefName: 'jdbc/JacketDB'
+    ])
+}
+```
+
+`expand` property takes a directionary with names of text to replace and what it should be replaced with.
+
+Placeholders start with `$` in file, for example web.xml might have `<res-ref-name>$resourceRefName</res-ref-name>`.
