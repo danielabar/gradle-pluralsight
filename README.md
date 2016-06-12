@@ -31,6 +31,10 @@
     - [Introduction to Repositories](#introduction-to-repositories)
     - [Repository Dependencies](#repository-dependencies)
     - [Gradle Cache](#gradle-cache)
+  - [Testing](#testing)
+    - [Running Tests](#running-tests)
+    - [Using Filters to Select Tests](#using-filters-to-select-tests)
+    - [Adding Other Test Types](#adding-other-test-types)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
